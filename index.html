@@ -1,0 +1,1954 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MetaMind Tech POS</title>
+  <style>
+    :root{
+      --bg:#0b1220;--panel:#111a2e;--panel2:#16213a;--line:#24304d;--text:#eaf0ff;--muted:#92a0bf;
+      --accent:#62a8ff;--accent2:#7cdbb6;--danger:#ff6b6b;--warn:#ffcd5c;--good:#56d364;
+      --shadow:0 12px 35px rgba(0,0,0,.28);--radius:18px;--radius2:12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#08111d 0%,#0c1526 100%);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit}
+    .app{display:grid;grid-template-columns:280px 1fr;height:100vh;overflow:hidden}
+    .sidebar{background:linear-gradient(180deg,#0f1830,#0d1629);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:260px}
+    .brand{display:flex;gap:12px;align-items:center;padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+    .logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,var(--accent),#8d7dff);display:grid;place-items:center;font-weight:800;font-size:20px;box-shadow:var(--shadow)}
+    .brand-title{font-size:16px;font-weight:800}
+    .brand-subtitle{color:var(--muted);font-size:12px}
+    .menu{padding:10px;overflow:auto}
+    .menu button{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;margin:4px 0;border:1px solid transparent;background:transparent;color:var(--text);border-radius:12px;cursor:pointer;text-align:left;transition:.15s}
+    .menu button:hover,.menu button.active{background:rgba(98,168,255,.12);border-color:rgba(98,168,255,.24)}
+    .menu small{margin-left:auto;color:var(--muted)}
+    .sidebar-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(14,22,39,.7);backdrop-filter:blur(10px)}
+    .top-left{display:flex;align-items:center;gap:12px}
+    .top-title{font-size:18px;font-weight:800}
+    .top-hint{color:var(--muted);font-size:12px}
+    .top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn,.icon-btn{border:1px solid var(--line);background:linear-gradient(180deg,#17233d,#10192d);color:var(--text);border-radius:12px;padding:10px 12px;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.16)}
+    .btn:hover,.icon-btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(180deg,#2d76ff,#2456cc);border-color:#2d76ff}
+    .btn.good{background:linear-gradient(180deg,#1f9d63,#18794b);border-color:#1f9d63}
+    .btn.warn{background:linear-gradient(180deg,#a57000,#7e5400);border-color:#a57000}
+    .btn.danger{background:linear-gradient(180deg,#b84444,#8d3232);border-color:#b84444}
+    .search{min-width:260px;max-width:420px;width:32vw;background:#0e1628;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px 12px;outline:none}
+    .content{overflow:auto;padding:16px}
+    .screen{display:none}
+    .screen.active{display:block}
+    .grid{display:grid;gap:14px}
+    .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:linear-gradient(180deg,#101a30,#0f1728);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 8px;font-size:14px;color:var(--muted);font-weight:600}
+    .card .num{font-size:30px;font-weight:900}
+    .card .sub{color:var(--muted);font-size:12px;margin-top:6px}
+    .panel{background:linear-gradient(180deg,#101a30,#0d1527);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .panel-hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .panel-bd{padding:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:170px;flex:1}
+    .field.wide{flex:2;min-width:280px}
+    .field label{font-size:12px;color:var(--muted)}
+    .field input,.field select,.field textarea{background:#0b1220;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:10px 12px;outline:none}
+    .field textarea{min-height:84px;resize:vertical}
+    .table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--line)}
+    table{width:100%;border-collapse:separate;border-spacing:0;background:#0d1526}
+    th,td{padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+    th{position:sticky;top:0;background:#10192d;text-align:left;font-size:12px;color:#b9c6e8}
+    tr:hover td{background:rgba(98,168,255,.06)}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#dce5ff;background:#0c1425}
+    .pill.good{border-color:rgba(86,211,100,.35);background:rgba(86,211,100,.08)}
+    .pill.warn{border-color:rgba(255,205,92,.4);background:rgba(255,205,92,.08)}
+    .pill.bad{border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.08)}
+    .muted{color:var(--muted)}
+    .split{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    .split2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .kbd{display:inline-block;padding:2px 6px;border-radius:6px;border:1px solid var(--line);background:#0d1526;color:#dbe6ff;font-size:11px}
+    .mini{font-size:12px}
+    .right{margin-left:auto}
+    .toast{position:fixed;right:16px;bottom:16px;z-index:50;background:#0f1830;border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);max-width:340px}
+    .toast.good{border-color:rgba(86,211,100,.45)}
+    .toast.bad{border-color:rgba(255,107,107,.45)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(4,8,16,.66);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:70;padding:16px}
+    .modal-backdrop.show{display:flex}
+    .modal{width:min(920px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,#101a30,#0d1527);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+    .modal.huge{width:min(1200px,100%)}
+    .modal-hd,.modal-ft{padding:14px 16px;border-bottom:1px solid var(--line)}
+    .modal-ft{border-bottom:none;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+    .modal-bd{padding:16px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{border:1px solid var(--line);padding:9px 12px;border-radius:999px;background:#0b1220;color:var(--text);cursor:pointer}
+    .tab.active{background:rgba(98,168,255,.14);border-color:rgba(98,168,255,.35)}
+    .chart{height:220px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#0c1425,#0d1526);padding:12px}
+    .bar-row{display:flex;align-items:end;gap:10px;height:150px}
+    .bar{flex:1;background:linear-gradient(180deg,var(--accent),#345fdb);border-radius:12px 12px 6px 6px;min-width:16px;position:relative}
+    .bar span{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:11px;color:#c8d5ff;white-space:nowrap}
+    .bar-labels{display:flex;gap:10px;margin-top:8px;font-size:11px;color:var(--muted)}
+    .bar-labels div{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pos-layout{display:grid;grid-template-columns:1fr 360px;gap:14px}
+    .pos-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+    .product-card{border:1px solid var(--line);border-radius:14px;background:#0b1220;padding:12px;cursor:pointer}
+    .product-card:hover{background:#0f172b}
+    .product-card .name{font-weight:700}
+    .product-card .meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .cart-row{display:grid;grid-template-columns:1.3fr .6fr .8fr .8fr .6fr .7fr auto;gap:8px;align-items:center}
+    .cart-row > div,.cart-row > input{min-width:0}
+    .small-input{width:100%;background:#0b1220;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:8px 10px}
+    .hidden{display:none !important}
+    .warning{padding:12px;border-radius:12px;background:rgba(255,205,92,.1);border:1px solid rgba(255,205,92,.3)}
+    .dangerbox{padding:12px;border-radius:12px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.28)}
+    .footer-note{color:var(--muted);font-size:12px;margin-top:10px}
+    @media (max-width:1200px){
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .split,.split2,.pos-layout{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;transform:translateX(0);z-index:30}
+      .app{grid-template-columns:1fr}
+      .main{margin-left:280px}
+    }
+    @media (max-width:900px){
+      .search{min-width:160px;width:100%}
+      .topbar{flex-direction:column;align-items:stretch}
+      .top-right,.top-left{width:100%;flex-wrap:wrap}
+      .main{margin-left:0}
+      .sidebar{display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <div class="brand-title">MetaMind Tech POS</div>
+        <div class="brand-subtitle">Commercial POS Suite</div>
+      </div>
+    </div>
+    <div class="menu" id="menu"></div>
+    <div class="sidebar-footer">
+      <div>© MetaMind Tech POS</div>
+      <div>Developer Name ©</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="top-left">
+        <button class="icon-btn" id="toggleSidebar">☰</button>
+        <div>
+          <div class="top-title" id="screenTitle">Dashboard</div>
+          <div class="top-hint" id="screenHint">Fast billing, inventory, reports, and more.</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <input class="search" id="globalSearch" placeholder="Global search: product, invoice, customer..." />
+        <button class="btn primary" id="quickSaleBtn">+ Sale</button>
+        <button class="btn" id="quickPurchaseBtn">+ Purchase</button>
+        <button class="btn" id="backupBtn">Backup</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="appRoot"></div>
+    </div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(() => {
+  const LS_KEY = 'metamind_pos_db_v1';
+
+  const uid = (p='ID') => p + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+  const fmt = n => (Number(n)||0).toFixed(2);
+  const today = () => new Date().toISOString().slice(0,10);
+  const nowIso = () => new Date().toISOString();
+  const money = n => 'Rs. ' + fmt(n);
+  const safe = s => String(s ?? '').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  const sum = arr => arr.reduce((a,b)=>a + (Number(b)||0),0);
+
+  const defaultDB = () => ({
+    meta: { appName:'MetaMind Tech POS', version:'1.0.0', createdAt: nowIso() },
+    settings: {
+      companyName:'MetaMind Tech POS',
+      address:'',
+      phone:'',
+      email:'',
+      website:'',
+      receiptFooter:'Thank you for your business!',
+      dbMode:'sqlite',
+      theme:'dark',
+      license:'trial',
+      trialEnd: new Date(Date.now() + 7*24*3600*1000).toISOString(),
+      printerMode:'thermal'
+    },
+    categories: [
+      {id:uid('CAT'), name:'General', parentId:'', active:true, icon:'📦'}
+    ],
+    brands: [{id:uid('BR'), name:'Default', notes:'', logo:'🏷️'}],
+    units: [
+      {id:uid('U'), name:'PCS'},{id:uid('U'), name:'KG'},{id:uid('U'), name:'LITER'},{id:uid('U'), name:'BOX'}
+    ],
+    suppliers: [],
+    customers: [],
+    products: [],
+    purchases: [],
+    sales: [],
+    returns: [],
+    users: [
+      {id:uid('USR'), username:'superadmin', pin:'1234', role:'Super Admin', active:true, permissions:{all:true}, lastLogin:'', lastActivity:''}
+    ],
+    audit: [],
+    heldInvoices: [],
+    backups: [],
+    network: { mode:'offline', serverIP:'', port:'3306', dbName:'', username:'', password:'' }
+  });
+
+  let db = loadDB();
+  let state = {
+    screen:'dashboard',
+    query:'',
+    posCart: [],
+    posCustomerId: '',
+    posDiscount: 0,
+    posPayment: 'cash',
+    selectedProductId: '',
+    reportTab: 'sales'
+  };
+
+  seed();
+  saveDB();
+
+  const menuItems = [
+    ['dashboard','Dashboard','⌂'],
+    ['pos','POS Billing','⚡'],
+    ['products','Products','📦'],
+    ['categories','Categories','🗂'],
+    ['brands','Brands','🏷'],
+    ['units','Units','∎'],
+    ['suppliers','Suppliers','🚚'],
+    ['customers','Customers','👥'],
+    ['inventory','Inventory','📊'],
+    ['lowstock','Low Stock','⚠'],
+    ['negstock','Negative Stock','−'],
+    ['purchases','Purchase / GRN','🧾'],
+    ['sales','Sales Invoices','🧾'],
+    ['returns','Returns','↩'],
+    ['reports','Reports','📈'],
+    ['users','Users','🔐'],
+    ['settings','Settings','⚙'],
+    ['audit','Audit Logs','🕒'],
+    ['backup','Backup & Recovery','💾'],
+    ['analytics','Analytics','📉'],
+    ['credits','Credits','★']
+  ];
+
+  function loadDB(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      return raw ? JSON.parse(raw) : defaultDB();
+    }catch{
+      return defaultDB();
+    }
+  }
+  function saveDB(){ localStorage.setItem(LS_KEY, JSON.stringify(db)); }
+  function log(action, meta={}){
+    db.audit.unshift({id:uid('AUD'), date:nowIso(), action, meta});
+    saveDB();
+  }
+  function toast(msg, kind='good'){
+    const root = document.getElementById('toastRoot');
+    const el = document.createElement('div');
+    el.className = `toast ${kind}`;
+    el.innerHTML = safe(msg);
+    root.appendChild(el);
+    setTimeout(()=>el.remove(), 2600);
+  }
+  function seed(){
+    if(!db.products.length){
+      const c = db.categories[0].id, b = db.brands[0].id, u = db.units[0].id;
+      db.products.push(
+        {id:uid('PR'), name:'Sample Product A', barcode:'1001', sku:'SKU-1001', categoryId:c, brandId:b, unitId:u, cost:100, sale:140, stock:25, threshold:5, status:'active', notes:'', warehouse:'Main'},
+        {id:uid('PR'), name:'Sample Product B', barcode:'1002', sku:'SKU-1002', categoryId:c, brandId:b, unitId:u, cost:200, sale:260, stock:8, threshold:10, status:'active', notes:'', warehouse:'Main'}
+      );
+    }
+  }
+
+  function menuHtml(){
+    return menuItems.map(([key,label,icon]) => `
+      <button class="${state.screen===key?'active':''}" data-screen="${key}">
+        <span>${icon}</span><span>${label}</span>
+        <small>${shortCount(key)}</small>
+      </button>`).join('');
+  }
+  function shortCount(key){
+    if(key==='products') return db.products.length;
+    if(key==='suppliers') return db.suppliers.length;
+    if(key==='customers') return db.customers.length;
+    if(key==='purchases') return db.purchases.length;
+    if(key==='sales') return db.sales.length;
+    if(key==='returns') return db.returns.length;
+    if(key==='lowstock') return lowStock().length;
+    if(key==='negstock') return negativeStock().length;
+    return '';
+  }
+  function setScreen(screen){
+    state.screen = screen;
+    document.querySelectorAll('.menu button').forEach(b=>b.classList.toggle('active', b.dataset.screen===screen));
+    const titles = {
+      dashboard:['Dashboard','Live sales widgets, summary, recent invoices, low stock alerts.'],
+      pos:['POS Billing','Barcode search, cart edit, hold/resume, payment, and invoice preview.'],
+      products:['Products','Add, edit, delete, barcode, sku, stock, and product visibility.'],
+      categories:['Categories','Create categories before assigning products.'],
+      brands:['Brands','Manage brand records for product assignment.'],
+      units:['Units','PCS, KG, LITER, BOX and custom units.'],
+      suppliers:['Suppliers','Purchase histories and supplier balances.'],
+      customers:['Customers','Khata, statements, and purchase history.'],
+      inventory:['Inventory','Add stock, create purchase invoice, sync stock movement.'],
+      lowstock:['Low Stock','Items at or below threshold.'],
+      negstock:['Negative Stock','Products with negative stock.'],
+      purchases:['Purchase / GRN','Purchase invoices created from stock additions.'],
+      sales:['Sales Invoices','Invoices created after POS billing.'],
+      returns:['Returns','Customer returns and supplier returns.'],
+      reports:['Reports','Sales, purchases, inventory, low stock, profit and more.'],
+      users:['Users','User CRUD, roles, pin, active/inactive.'],
+      settings:['Settings','Company, database, printer, network, license.'],
+      audit:['Audit Logs','Searchable activity tracking.'],
+      backup:['Backup & Recovery','Export, import, restore and recovery.'],
+      analytics:['Analytics','Charts for revenue, purchases and stock movement.'],
+      credits:['Credits','Developer and version details.']
+    };
+    document.getElementById('screenTitle').textContent = titles[screen][0];
+    document.getElementById('screenHint').textContent = titles[screen][1];
+    render();
+  }
+
+  function productById(id){ return db.products.find(p=>p.id===id); }
+  function categoryById(id){ return db.categories.find(x=>x.id===id); }
+  function brandById(id){ return db.brands.find(x=>x.id===id); }
+  function unitById(id){ return db.units.find(x=>x.id===id); }
+  function customerById(id){ return db.customers.find(x=>x.id===id); }
+  function supplierById(id){ return db.suppliers.find(x=>x.id===id); }
+
+  function productStats(pid){
+    const p = productById(pid);
+    const purchased = sum(db.purchases.flatMap(x=>x.items).filter(x=>x.productId===pid).map(x=>x.qty));
+    const sold = sum(db.sales.flatMap(x=>x.items).filter(x=>x.productId===pid).map(x=>x.qty));
+    const returned = sum(db.returns.flatMap(x=>x.items||[]).filter(x=>x.productId===pid).map(x=>x.qty));
+    const reserved = 0;
+    return {current:p?Number(p.stock)||0:0, purchased, sold, returned, reserved};
+  }
+
+  function lowStock(){ return db.products.filter(p => Number(p.stock)<=Number(p.threshold)); }
+  function negativeStock(){ return db.products.filter(p => Number(p.stock)<0); }
+
+  function matchesQuery(p, q){
+    if(!q) return true;
+    q = q.toLowerCase();
+    return [
+      p.name,p.barcode,p.sku,p.notes,
+      categoryById(p.categoryId)?.name,
+      brandById(p.brandId)?.name,
+      unitById(p.unitId)?.name,
+      p.warehouse, String(p.cost), String(p.sale), String(p.stock)
+    ].some(v => String(v||'').toLowerCase().includes(q));
+  }
+
+  function openModal(title, bodyHtml, footerHtml=''){
+    const root = document.getElementById('modalRoot');
+    root.innerHTML = `
+      <div class="modal-backdrop show" id="modalBackdrop">
+        <div class="modal">
+          <div class="modal-hd">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+              <div>
+                <div style="font-size:18px;font-weight:800">${safe(title)}</div>
+                <div class="muted mini">Press Esc to close</div>
+              </div>
+              <button class="btn" data-close>✕</button>
+            </div>
+          </div>
+          <div class="modal-bd">${bodyHtml}</div>
+          <div class="modal-ft">${footerHtml || '<button class="btn" data-close>Close</button>'}</div>
+        </div>
+      </div>`;
+    const close = () => { root.innerHTML=''; };
+    root.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
+    root.querySelector('#modalBackdrop').onclick = (e) => { if(e.target.id==='modalBackdrop') close(); };
+    window.addEventListener('keydown', function esc(e){ if(e.key==='Escape'){ close(); window.removeEventListener('keydown', esc); }});
+    return { close };
+  }
+
+  function formModal({title, fields, values={}, onSave, size='normal'}){
+    const id = uid('F');
+    const body = `
+      <form id="${id}">
+        <div class="split2">
+          ${fields.map(f => fieldHtml(f, values[f.name] ?? f.default ?? '')) .join('')}
+        </div>
+      </form>`;
+    const footer = `
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn primary" type="submit" form="${id}">Save</button>`;
+    const modal = openModal(title, body, footer);
+    const form = document.getElementById(id);
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const obj = {};
+      for(const f of fields){
+        let v = fd.get(f.name);
+        if(f.type === 'number') v = Number(v||0);
+        if(f.type === 'checkbox') v = fd.get(f.name)==='on';
+        obj[f.name] = v;
+      }
+      onSave(obj, modal.close);
+    };
+    return modal;
+  }
+  function fieldHtml(f, value){
+    if(f.type === 'hidden') return `<input type="hidden" name="${safe(f.name)}" value="${safe(value)}">`;
+    if(f.type === 'textarea') return `
+      <div class="field ${f.wide?'wide':''}">
+        <label>${safe(f.label)}</label>
+        <textarea name="${safe(f.name)}" placeholder="${safe(f.placeholder||'')}">${safe(value)}</textarea>
+      </div>`;
+    if(f.type === 'select'){
+      return `
+        <div class="field ${f.wide?'wide':''}">
+          <label>${safe(f.label)}</label>
+          <select name="${safe(f.name)}">${(f.options||[]).map(o => `<option value="${safe(o.value)}" ${String(o.value)==String(value)?'selected':''}>${safe(o.label)}</option>`).join('')}</select>
+        </div>`;
+    }
+    return `
+      <div class="field ${f.wide?'wide':''}">
+        <label>${safe(f.label)}</label>
+        <input type="${f.type||'text'}" name="${safe(f.name)}" value="${safe(value)}" placeholder="${safe(f.placeholder||'')}" ${f.step?`step="${f.step}"`:''} ${f.min!=null?`min="${f.min}"`:''} ${f.max!=null?`max="${f.max}"`:''} ${f.required?'required':''} />
+      </div>`;
+  }
+
+  function renderMenu(){ document.getElementById('menu').innerHTML = menuHtml(); }
+
+  function render(){
+    renderMenu();
+    document.getElementById('appRoot').innerHTML = screenRenderer[state.screen] ? screenRenderer[state.screen]() : `<div class="panel"><div class="panel-bd">Unknown screen</div></div>`;
+    attachTableFilters();
+  }
+
+  function attachTableFilters(){
+    document.querySelectorAll('[data-filter-table]').forEach(tblId => {
+      const table = document.getElementById(tblId);
+      if(!table) return;
+      const inputs = table.querySelectorAll('[data-col-search]');
+      inputs.forEach(inp => inp.oninput = () => {
+        const cols = Array.from(inputs).map(x => x.value.toLowerCase());
+        table.querySelectorAll('tbody tr').forEach(tr => {
+          const tds = Array.from(tr.children);
+          const show = cols.every((q,i) => !q || (tds[i] && tds[i].innerText.toLowerCase().includes(q)));
+          tr.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  function exportCSV(name, rows){
+    if(!rows.length){ toast('Nothing to export','bad'); return; }
+    const keys = Object.keys(rows[0]);
+    const csv = [keys.join(',')].concat(rows.map(r => keys.map(k => `"${String(r[k] ?? '').replaceAll('"','""')}"`).join(','))).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function printReceipt(sale){
+    const items = sale.items.map(i => `
+      <tr><td>${safe(i.name)}</td><td>${i.qty}</td><td>${fmt(i.price)}</td><td>${fmt(i.lineTotal)}</td></tr>`).join('');
+    const win = window.open('', '_blank', 'width=800,height=900');
+    win.document.write(`
+      <html><head><title>${safe(sale.invoiceNo)}</title>
+      <style>
+        body{font-family:Arial;padding:20px} table{width:100%;border-collapse:collapse} td,th{border-bottom:1px solid #ccc;padding:6px;text-align:left}
+      </style></head><body>
+      <h2>${safe(db.settings.companyName)}</h2>
+      <div>Invoice: ${safe(sale.invoiceNo)} | Date: ${safe(sale.date)}</div>
+      <div>Customer: ${safe(customerById(sale.customerId)?.name || 'Walk-in')}</div>
+      <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${items}</tbody></table>
+      <h3>Total: ${money(sale.total)}</h3>
+      <p>${safe(db.settings.receiptFooter)}</p>
+      <script>window.print()</script>
+      </body></html>`);
+    win.document.close();
+  }
+
+  function addAudit(action, meta={}){ log(action, meta); }
+
+  function createSaleInvoiceFromCart(){
+    if(!state.posCart.length){ toast('Cart is empty','bad'); return; }
+    const invoiceNo = 'INV-' + Date.now().toString().slice(-8);
+    const subtotal = sum(state.posCart.map(i => Number(i.qty)*Number(i.price)));
+    const discount = Number(state.posDiscount)||0;
+    const total = Math.max(0, subtotal - discount);
+    const items = state.posCart.map(i => ({
+      productId:i.productId, name:i.name, qty:Number(i.qty), price:Number(i.price),
+      discount:Number(i.discount)||0, lineTotal: Number(i.qty)*Number(i.price) - (Number(i.discount)||0)
+    }));
+    for(const it of items){
+      const p = productById(it.productId);
+      if(p) p.stock = Number(p.stock||0) - Number(it.qty||0);
+    }
+    const sale = {
+      id: uid('SAL'),
+      invoiceNo, date: today(), ts: nowIso(),
+      customerId: state.posCustomerId || '',
+      items, subtotal, discount, total,
+      paymentMethod: state.posPayment
+    };
+    db.sales.unshift(sale);
+    db.heldInvoices = db.heldInvoices.filter(h => h.id !== state.posHoldId);
+    state.posCart = [];
+    state.posDiscount = 0;
+    state.posCustomerId = '';
+    state.posHoldId = '';
+    saveDB();
+    addAudit('Sale invoice created', {invoiceNo, total});
+    toast('Sale invoice created successfully');
+    printReceipt(sale);
+    render();
+  }
+
+  function createPurchaseInvoice(payload){
+    const invoiceNo = 'PUR-' + Date.now().toString().slice(-8);
+    const items = payload.items.map(it => {
+      const p = productById(it.productId);
+      return {
+        productId: it.productId,
+        name: p?.name || it.name,
+        qty: Number(it.qty||0),
+        cost: Number(it.cost||p?.cost||0),
+        lineTotal: Number(it.qty||0) * Number(it.cost||p?.cost||0)
+      };
+    });
+    items.forEach(it => {
+      const p = productById(it.productId);
+      if(p) p.stock = Number(p.stock||0) + Number(it.qty||0);
+    });
+    const total = sum(items.map(i => i.lineTotal)) + Number(payload.expenses||0);
+    const purchase = {
+      id: uid('PUR'),
+      invoiceNo, date: today(), ts: nowIso(),
+      supplierId: payload.supplierId || '',
+      items,
+      expenses: Number(payload.expenses||0),
+      note: payload.note || '',
+      total,
+      source: 'inventory-add'
+    };
+    db.purchases.unshift(purchase);
+    saveDB();
+    addAudit('Purchase invoice created', {invoiceNo, total});
+    toast('Purchase invoice created and stock updated');
+    render();
+  }
+
+  function addProduct(data, editId=''){
+    const obj = {
+      id: editId || uid('PR'),
+      name:data.name,
+      barcode:data.barcode || '',
+      sku:data.sku || ('SKU-' + Math.floor(Math.random()*999999)),
+      categoryId:data.categoryId,
+      brandId:data.brandId,
+      unitId:data.unitId,
+      cost:Number(data.cost||0),
+      sale:Number(data.sale||0),
+      stock:Number(data.stock||0),
+      threshold:Number(data.threshold||0),
+      status:data.status,
+      notes:data.notes || '',
+      warehouse:data.warehouse || 'Main'
+    };
+    const idx = db.products.findIndex(x => x.id===obj.id);
+    if(idx >= 0) db.products[idx] = obj; else db.products.unshift(obj);
+    saveDB();
+    addAudit(editId ? 'Product updated' : 'Product added', {name: obj.name});
+    toast(editId ? 'Product updated' : 'Product added');
+    render();
+  }
+
+  function deleteById(arrName, id){
+    db[arrName] = db[arrName].filter(x => x.id !== id);
+    saveDB();
+    addAudit(`Deleted from ${arrName}`, {id});
+    toast('Deleted');
+    render();
+  }
+
+  function addCategory(data, editId=''){
+    const obj = {id:editId || uid('CAT'), name:data.name, parentId:data.parentId || '', active:!!data.active, icon:data.icon || '🗂'};
+    const idx = db.categories.findIndex(x => x.id===obj.id);
+    if(idx>=0) db.categories[idx]=obj; else db.categories.unshift(obj);
+    saveDB(); addAudit(editId?'Category updated':'Category added', {name:obj.name}); render();
+  }
+  function addBrand(data, editId=''){
+    const obj = {id:editId || uid('BR'), name:data.name, notes:data.notes||'', logo:data.logo||'🏷️'};
+    const idx = db.brands.findIndex(x=>x.id===obj.id); if(idx>=0) db.brands[idx]=obj; else db.brands.unshift(obj);
+    saveDB(); addAudit(editId?'Brand updated':'Brand added', {name:obj.name}); render();
+  }
+  function addUnit(data, editId=''){
+    const obj = {id:editId || uid('U'), name:data.name};
+    const idx = db.units.findIndex(x=>x.id===obj.id); if(idx>=0) db.units[idx]=obj; else db.units.unshift(obj);
+    saveDB(); addAudit(editId?'Unit updated':'Unit added', {name:obj.name}); render();
+  }
+  function addSupplier(data, editId=''){
+    const obj = {id:editId || uid('SUP'), name:data.name, phone:data.phone||'', email:data.email||'', address:data.address||'', notes:data.notes||''};
+    const idx = db.suppliers.findIndex(x=>x.id===obj.id); if(idx>=0) db.suppliers[idx]=obj; else db.suppliers.unshift(obj);
+    saveDB(); addAudit(editId?'Supplier updated':'Supplier added', {name:obj.name}); render();
+  }
+  function addCustomer(data, editId=''){
+    const obj = {id:editId || uid('CUS'), name:data.name, phone:data.phone||'', email:data.email||'', address:data.address||'', notes:data.notes||'', balance:Number(data.balance||0)};
+    const idx = db.customers.findIndex(x=>x.id===obj.id); if(idx>=0) db.customers[idx]=obj; else db.customers.unshift(obj);
+    saveDB(); addAudit(editId?'Customer updated':'Customer added', {name:obj.name}); render();
+  }
+  function addUser(data, editId=''){
+    const obj = {id:editId || uid('USR'), username:data.username, pin:data.pin||'1234', role:data.role||'Staff', active:!!data.active, permissions:{all:!!data.all}};
+    const idx = db.users.findIndex(x=>x.id===obj.id); if(idx>=0) db.users[idx]=obj; else db.users.unshift(obj);
+    saveDB(); addAudit(editId?'User updated':'User added', {username:obj.username}); render();
+  }
+
+  function sidebarToggle(){
+    const sb = document.getElementById('sidebar');
+    if(window.matchMedia('(max-width:900px)').matches){
+      sb.style.display = sb.style.display==='block' ? 'none' : 'block';
+      sb.style.position = 'fixed';
+    }
+  }
+
+  function globalSearch(q){
+    state.query = q;
+    if(state.screen === 'dashboard' || state.screen === 'reports' || state.screen==='products'){
+      render();
+    }
+  }
+
+  function renderDashboard(){
+    const revenue = sum(db.sales.map(x=>Number(x.total)||0));
+    const purchaseTotal = sum(db.purchases.map(x=>Number(x.total)||0));
+    const profit = revenue - purchaseTotal;
+    const stockValue = sum(db.products.map(p => Number(p.stock||0) * Number(p.cost||0)));
+    const recents = db.sales.slice(0,5);
+    const alerts = lowStock().slice(0,5);
+    const topProducts = [...db.products].sort((a,b)=> (Number(b.stock)||0) - (Number(a.stock)||0)).slice(0,6);
+
+    return `
+      <div class="grid cards">
+        <div class="card"><h3>Total Sales</h3><div class="num">${money(revenue)}</div><div class="sub">${db.sales.length} invoices</div></div>
+        <div class="card"><h3>Total Purchases</h3><div class="num">${money(purchaseTotal)}</div><div class="sub">${db.purchases.length} purchase invoices</div></div>
+        <div class="card"><h3>Estimated Profit</h3><div class="num">${money(profit)}</div><div class="sub">sales - purchases</div></div>
+        <div class="card"><h3>Inventory Value</h3><div class="num">${money(stockValue)}</div><div class="sub">${db.products.length} products</div></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Recent Sales</strong><span class="muted">Latest invoices</span></div>
+          <div class="panel-bd">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Action</th></tr></thead>
+                <tbody>
+                  ${recents.map(s => `<tr>
+                    <td>${safe(s.invoiceNo)}</td>
+                    <td>${safe(s.date)}</td>
+                    <td>${safe(customerById(s.customerId)?.name || 'Walk-in')}</td>
+                    <td>${money(s.total)}</td>
+                    <td><button class="btn" data-open-sale="${s.id}">View</button></td>
+                  </tr>`).join('') || `<tr><td colspan="5" class="muted">No sales yet</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd"><strong>Low Stock Alerts</strong><span class="muted">Threshold based</span></div>
+          <div class="panel-bd">
+            ${alerts.length ? alerts.map(p => `
+              <div class="warning" style="margin-bottom:10px">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+                  <div><strong>${safe(p.name)}</strong><div class="muted mini">Current: ${p.stock} | Threshold: ${p.threshold}</div></div>
+                  <button class="btn warn" data-open-product="${p.id}">Open</button>
+                </div>
+              </div>`).join('') : `<div class="muted">No low stock items</div>`}
+          </div>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Top Products</strong><span class="muted">By current stock</span></div>
+          <div class="panel-bd">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Product</th><th>Stock</th><th>Sold</th><th>Purchased</th><th>Action</th></tr></thead>
+                <tbody>
+                  ${topProducts.map(p => { const st = productStats(p.id); return `<tr>
+                    <td>${safe(p.name)}</td><td>${st.current}</td><td>${st.sold}</td><td>${st.purchased}</td>
+                    <td><button class="btn" data-open-product="${p.id}">Details</button></td>
+                  </tr>`; }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>Quick Actions</strong><span class="muted">Keyboard friendly</span></div>
+          <div class="panel-bd">
+            <div class="row">
+              <button class="btn primary" id="gotoPos">Open POS <span class="kbd">F1</span></button>
+              <button class="btn" id="gotoProducts">Products</button>
+              <button class="btn" id="gotoInventory">Inventory</button>
+              <button class="btn" id="gotoReports">Reports</button>
+            </div>
+            <div class="footer-note">Global shortcuts: <span class="kbd">F1</span> POS, <span class="kbd">F2</span> Save/Quick action, <span class="kbd">F3</span> Hold, <span class="kbd">F4</span> Payment, <span class="kbd">F5</span> Refresh, <span class="kbd">Ctrl+P</span> Print</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPOS(){
+    const q = (state.query||'').toLowerCase();
+    const products = db.products.filter(p => matchesQuery(p, q));
+    const cartTotal = sum(state.posCart.map(i => Number(i.qty)*Number(i.price) - Number(i.discount||0)));
+    const customerOptions = ['<option value="">Walk-in Customer</option>'].concat(db.customers.map(c=>`<option value="${c.id}" ${c.id===state.posCustomerId?'selected':''}>${safe(c.name)}</option>`)).join('');
+    return `
+      <div class="pos-layout">
+        <div class="panel">
+          <div class="panel-hd">
+            <strong>POS Billing</strong>
+            <div class="row" style="margin:0">
+              <input id="barcodeInput" class="search" style="width:220px;min-width:220px" placeholder="Scan barcode / search product" />
+              <button class="btn" id="holdSaleBtn">Hold <span class="kbd">F3</span></button>
+              <button class="btn primary" id="paySaleBtn">Payment <span class="kbd">F4</span></button>
+            </div>
+          </div>
+          <div class="panel-bd">
+            <div class="row">
+              <div class="field wide">
+                <label>Customer</label>
+                <select id="posCustomer">${customerOptions}</select>
+              </div>
+              <div class="field">
+                <label>Sale Discount</label>
+                <input id="posDiscount" type="number" min="0" step="0.01" value="${state.posDiscount}">
+              </div>
+              <div class="field">
+                <label>Payment Mode</label>
+                <select id="posPayment">
+                  ${['cash','card','wallet','credit','qr'].map(x=>`<option value="${x}" ${x===state.posPayment?'selected':''}>${x.toUpperCase()}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="pos-products">
+              ${products.slice(0,80).map(p => {
+                const st = productStats(p.id);
+                return `<div class="product-card" data-add-product="${p.id}">
+                  <div class="name">${safe(p.name)}</div>
+                  <div class="meta">Barcode: ${safe(p.barcode || '-')}</div>
+                  <div class="meta">Stock: ${st.current} | Sale: ${money(p.sale)}</div>
+                </div>`;
+              }).join('') || `<div class="muted">No products found</div>`}
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd"><strong>Cart</strong><span class="muted">${state.posCart.length} items</span></div>
+          <div class="panel-bd">
+            <div class="grid" style="gap:10px">
+              ${state.posCart.map((i, idx) => `
+                <div class="cart-row">
+                  <div>
+                    <div style="font-weight:700">${safe(i.name)}</div>
+                    <div class="muted mini">${safe(i.barcode||'')}</div>
+                  </div>
+                  <input class="small-input" data-cart-field="${idx}" data-field="qty" type="number" min="1" step="1" value="${i.qty}">
+                  <input class="small-input" data-cart-field="${idx}" data-field="price" type="number" min="0" step="0.01" value="${fmt(i.price)}">
+                  <input class="small-input" data-cart-field="${idx}" data-field="discount" type="number" min="0" step="0.01" value="${fmt(i.discount||0)}">
+                  <div class="muted">${money(Number(i.qty)*Number(i.price)-Number(i.discount||0))}</div>
+                  <button class="btn danger" data-remove-cart="${idx}">X</button>
+                </div>
+              `).join('') || `<div class="muted">Cart is empty</div>`}
+            </div>
+            <hr style="border-color:var(--line);margin:14px 0">
+            <div class="row">
+              <div class="field"><label>Subtotal</label><input readonly value="${fmt(sum(state.posCart.map(i=>Number(i.qty)*Number(i.price))))}"></div>
+              <div class="field"><label>Total Discount</label><input readonly value="${fmt(Number(state.posDiscount)||0)}"></div>
+              <div class="field"><label>Total</label><input readonly value="${fmt(cartTotal - Number(state.posDiscount||0))}"></div>
+            </div>
+
+            <div style="height:10px"></div>
+            <div class="row">
+              <button class="btn good" id="saveSaleBtn">Save Sale <span class="kbd">F2</span></button>
+              <button class="btn" id="resumeHoldBtn">Resume Hold</button>
+              <button class="btn" id="clearCartBtn">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+      <div class="panel">
+        <div class="panel-hd"><strong>Invoice Preview / Held Invoices</strong><span class="muted">Runtime preview</span></div>
+        <div class="panel-bd">
+          <div class="split2">
+            <div class="panel" style="box-shadow:none">
+              <div class="panel-hd"><strong>Preview</strong></div>
+              <div class="panel-bd">
+                <div class="muted mini">Current sale invoice will appear after payment.</div>
+                <div class="footer-note">Current stock, sold quantity, purchased quantity, returned quantity, and reserved quantity are visible in product details.</div>
+              </div>
+            </div>
+            <div class="panel" style="box-shadow:none">
+              <div class="panel-hd"><strong>Held</strong></div>
+              <div class="panel-bd">
+                ${db.heldInvoices.length ? db.heldInvoices.map(h => `
+                  <div class="warning" style="margin-bottom:8px">
+                    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+                      <div><strong>${safe(h.name || 'Held Invoice')}</strong><div class="muted mini">${h.items.length} items</div></div>
+                      <button class="btn" data-resume-held="${h.id}">Resume</button>
+                    </div>
+                  </div>
+                `).join('') : '<div class="muted">No held invoices</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProducts(){
+    const q = (state.query||'').toLowerCase();
+    const filtered = db.products.filter(p => matchesQuery(p,q));
+    return `
+      <div class="panel">
+        <div class="panel-hd">
+          <strong>Product Management</strong>
+          <div class="row">
+            <button class="btn primary" id="addProductBtn">Add Product</button>
+            <button class="btn" id="exportProductsBtn">Export CSV</button>
+          </div>
+        </div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table id="productsTable">
+              <thead>
+                <tr>
+                  <th><input class="small-input" data-col-search placeholder="Name"></th>
+                  <th><input class="small-input" data-col-search placeholder="Barcode"></th>
+                  <th><input class="small-input" data-col-search placeholder="Category"></th>
+                  <th><input class="small-input" data-col-search placeholder="Brand"></th>
+                  <th><input class="small-input" data-col-search placeholder="Stock"></th>
+                  <th><input class="small-input" data-col-search placeholder="Sale"></th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filtered.map(p => {
+                  const c = categoryById(p.categoryId)?.name || '-';
+                  const b = brandById(p.brandId)?.name || '-';
+                  const st = productStats(p.id);
+                  return `<tr>
+                    <td>${safe(p.name)}</td><td>${safe(p.barcode||'')}</td><td>${safe(c)}</td><td>${safe(b)}</td>
+                    <td>${st.current}</td><td>${money(p.sale)}</td>
+                    <td>
+                      <button class="btn" data-open-product="${p.id}">Details</button>
+                      <button class="btn" data-edit-product="${p.id}">Edit</button>
+                      <button class="btn danger" data-del-product="${p.id}">Delete</button>
+                    </td>
+                  </tr>`;
+                }).join('') || `<tr><td colspan="7" class="muted">No products</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSimpleCRUD(type){
+    const map = {
+      categories: { title:'Categories', arr:db.categories, add:addCategory, fields:[
+        {name:'name',label:'Category Name',required:true},
+        {name:'parentId',label:'Parent Category',type:'select',options:[{value:'',label:'None'}].concat(db.categories.map(c=>({value:c.id,label:c.name})))},
+        {name:'icon',label:'Category Icon',default:'🗂'},
+        {name:'active',label:'Active',type:'checkbox'}
+      ]},
+      brands: { title:'Brands', arr:db.brands, add:addBrand, fields:[
+        {name:'name',label:'Brand Name',required:true},
+        {name:'logo',label:'Brand Logo',default:'🏷️'},
+        {name:'notes',label:'Brand Notes',type:'textarea',wide:true}
+      ]},
+      units: { title:'Units', arr:db.units, add:addUnit, fields:[
+        {name:'name',label:'Unit Name',required:true}
+      ]},
+      suppliers: { title:'Suppliers', arr:db.suppliers, add:addSupplier, fields:[
+        {name:'name',label:'Supplier Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ]},
+      customers: { title:'Customers', arr:db.customers, add:addCustomer, fields:[
+        {name:'name',label:'Customer Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'balance',label:'Opening Balance',type:'number',step:'0.01',default:0},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ]},
+      users: { title:'Users', arr:db.users, add:addUser, fields:[
+        {name:'username',label:'Username',required:true},
+        {name:'pin',label:'PIN',type:'password'},
+        {name:'role',label:'Role',default:'Staff'},
+        {name:'active',label:'Active',type:'checkbox'},
+        {name:'all',label:'Full Access',type:'checkbox'}
+      ]}
+    };
+    const cfg = map[type];
+    const rows = cfg.arr.map(x => {
+      if(type==='categories') return `<tr><td>${safe(x.icon||'🗂')}</td><td>${safe(x.name)}</td><td>${safe(categoryById(x.parentId)?.name || '-')}</td><td>${x.active ? '<span class="pill good">Active</span>' : '<span class="pill bad">Inactive</span>'}</td><td><button class="btn" data-edit-${type.slice(0,-1)}="${x.id}">Edit</button><button class="btn danger" data-del-${type.slice(0,-1)}="${x.id}">Delete</button></td></tr>`;
+      if(type==='brands') return `<tr><td>${safe(x.logo||'🏷️')}</td><td>${safe(x.name)}</td><td>${safe(x.notes||'')}</td><td><button class="btn" data-edit-brand="${x.id}">Edit</button><button class="btn danger" data-del-brand="${x.id}">Delete</button></td></tr>`;
+      if(type==='units') return `<tr><td>${safe(x.name)}</td><td><button class="btn" data-edit-unit="${x.id}">Edit</button><button class="btn danger" data-del-unit="${x.id}">Delete</button></td></tr>`;
+      if(type==='suppliers') return `<tr><td>${safe(x.name)}</td><td>${safe(x.phone||'')}</td><td>${safe(x.email||'')}</td><td>${safe((db.purchases.filter(p=>p.supplierId===x.id).length))}</td><td><button class="btn" data-edit-supplier="${x.id}">Edit</button><button class="btn danger" data-del-supplier="${x.id}">Delete</button></td></tr>`;
+      if(type==='customers') return `<tr><td>${safe(x.name)}</td><td>${safe(x.phone||'')}</td><td>${fmt(x.balance||0)}</td><td>${safe((db.sales.filter(s=>s.customerId===x.id).length))}</td><td><button class="btn" data-edit-customer="${x.id}">Edit</button><button class="btn danger" data-del-customer="${x.id}">Delete</button></td></tr>`;
+      if(type==='users') return `<tr><td>${safe(x.username)}</td><td>${safe(x.role)}</td><td>${x.active ? '<span class="pill good">Active</span>' : '<span class="pill bad">Inactive</span>'}</td><td><button class="btn" data-edit-user="${x.id}">Edit</button><button class="btn danger" data-del-user="${x.id}">Delete</button></td></tr>`;
+      return '';
+    }).join('');
+    return `
+      <div class="panel">
+        <div class="panel-hd">
+          <strong>${cfg.title}</strong>
+          <button class="btn primary" id="add-${type}">Add ${cfg.title.slice(0,-1)}</button>
+        </div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  ${type==='categories' ? '<th>Icon</th><th>Name</th><th>Parent</th><th>Status</th><th>Action</th>' : ''}
+                  ${type==='brands' ? '<th>Logo</th><th>Name</th><th>Notes</th><th>Action</th>' : ''}
+                  ${type==='units' ? '<th>Name</th><th>Action</th>' : ''}
+                  ${type==='suppliers' ? '<th>Name</th><th>Phone</th><th>Email</th><th>Purchases</th><th>Action</th>' : ''}
+                  ${type==='customers' ? '<th>Name</th><th>Phone</th><th>Balance</th><th>Sales</th><th>Action</th>' : ''}
+                  ${type==='users' ? '<th>Username</th><th>Role</th><th>Status</th><th>Action</th>' : ''}
+                </tr>
+              </thead>
+              <tbody>${rows || `<tr><td colspan="5" class="muted">No records</td></tr>`}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderInventory(){
+    const products = db.products;
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Add Stock / Purchase Invoice</strong><span class="muted">Creates purchase invoices automatically</span></div>
+          <div class="panel-bd">
+            <div class="row">
+              <div class="field wide">
+                <label>Supplier</label>
+                <select id="invSupplier">
+                  <option value="">Select Supplier</option>
+                  ${db.suppliers.map(s=>`<option value="${s.id}">${safe(s.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field"><label>Expenses</label><input id="invExpenses" type="number" step="0.01" value="0"></div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="table-wrap">
+              <table id="inventoryAddTable">
+                <thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Action</th></tr></thead>
+                <tbody>
+                  ${products.slice(0,20).map((p,i)=>`
+                    <tr>
+                      <td>${safe(p.name)}</td>
+                      <td><input class="small-input" data-inv-product="${p.id}" data-field="qty" type="number" min="0" step="1" value="0"></td>
+                      <td><input class="small-input" data-inv-product="${p.id}" data-field="cost" type="number" min="0" step="0.01" value="${fmt(p.cost)}"></td>
+                      <td><button class="btn" data-open-product="${p.id}">Details</button></td>
+                    </tr>`).join('') || `<tr><td colspan="4">No products</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+            <div style="height:12px"></div>
+            <button class="btn primary" id="createPurchaseBtn">Create Purchase Invoice</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd"><strong>Current Inventory Snapshot</strong><span class="muted">Visible stock metrics</span></div>
+          <div class="panel-bd">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Product</th><th>Current</th><th>Sold</th><th>Purchased</th><th>Returned</th></tr></thead>
+                <tbody>
+                  ${products.slice(0,30).map(p => {
+                    const s = productStats(p.id);
+                    return `<tr><td>${safe(p.name)}</td><td>${s.current}</td><td>${s.sold}</td><td>${s.purchased}</td><td>${s.returned}</td></tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderLowStock(){
+    const items = lowStock();
+    return simpleTableScreen('Low Stock Products', items.map(p=>({
+      Product:p.name, Current:p.stock, Threshold:p.threshold, Warehouse:p.warehouse || 'Main', 'Last Sale': lastSaleDate(p.id)
+    })));
+  }
+  function renderNegStock(){
+    const items = negativeStock();
+    return simpleTableScreen('Negative Stock Products', items.map(p=>({
+      Product:p.name, Current:p.stock, Sold: productStats(p.id).sold, Purchased: productStats(p.id).purchased, Warehouse:p.warehouse || 'Main'
+    })));
+  }
+  function lastSaleDate(pid){
+    const sale = db.sales.find(s => s.items.some(i => i.productId===pid));
+    return sale?.date || '-';
+  }
+
+  function simpleTableScreen(title, rows){
+    const keys = rows[0] ? Object.keys(rows[0]) : [];
+    return `
+      <div class="panel">
+        <div class="panel-hd"><strong>${safe(title)}</strong><button class="btn" id="exportGridBtn">Export CSV</button></div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>${keys.map(k=>`<th>${safe(k)}</th>`).join('')}</tr></thead>
+              <tbody>${rows.length ? rows.map(r=>`<tr>${keys.map(k=>`<td>${safe(r[k])}</td>`).join('')}</tr>`).join('') : `<tr><td class="muted">No rows</td></tr>`}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPurchases(){
+    return `
+      <div class="panel">
+        <div class="panel-hd"><strong>Purchase / GRN Reports</strong><span class="muted">${db.purchases.length} records</span></div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Invoice</th><th>Date</th><th>Supplier</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
+              <tbody>
+                ${db.purchases.map(p=>`
+                  <tr>
+                    <td>${safe(p.invoiceNo)}</td>
+                    <td>${safe(p.date)}</td>
+                    <td>${safe(supplierById(p.supplierId)?.name || '-')}</td>
+                    <td>${p.items.length}</td>
+                    <td>${money(p.total)}</td>
+                    <td><button class="btn" data-view-purchase="${p.id}">View</button></td>
+                  </tr>`).join('') || `<tr><td colspan="6" class="muted">No purchase invoices</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSales(){
+    return `
+      <div class="panel">
+        <div class="panel-hd"><strong>Sales Invoices</strong><span class="muted">${db.sales.length} records</span></div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
+              <tbody>
+                ${db.sales.map(s=>`
+                  <tr>
+                    <td>${safe(s.invoiceNo)}</td>
+                    <td>${safe(s.date)}</td>
+                    <td>${safe(customerById(s.customerId)?.name || 'Walk-in')}</td>
+                    <td>${s.items.length}</td>
+                    <td>${money(s.total)}</td>
+                    <td><button class="btn" data-view-sale="${s.id}">View</button></td>
+                  </tr>`).join('') || `<tr><td colspan="6" class="muted">No sale invoices</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderReturns(){
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Customer Returns</strong><span class="muted">Invoice-based</span></div>
+          <div class="panel-bd">
+            <div class="row">
+              <div class="field wide"><label>Invoice</label><select id="returnSaleId">
+                <option value="">Select Sale Invoice</option>
+                ${db.sales.map(s=>`<option value="${s.id}">${safe(s.invoiceNo)}</option>`).join('')}
+              </select></div>
+              <div class="field"><label>Amount</label><input id="returnAmount" type="number" step="0.01" value="0"></div>
+            </div>
+            <div style="height:10px"></div>
+            <button class="btn primary" id="saveReturnBtn">Save Return</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>Return Reports</strong><span class="muted">${db.returns.length} records</span></div>
+          <div class="panel-bd">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Type</th><th>Date</th><th>Amount</th></tr></thead>
+                <tbody>
+                  ${db.returns.map(r=>`<tr><td>${safe(r.id)}</td><td>${safe(r.type)}</td><td>${safe(r.date)}</td><td>${money(r.amount||0)}</td></tr>`).join('') || `<tr><td colspan="4" class="muted">No returns</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderReports(){
+    const salesTotal = sum(db.sales.map(x=>x.total));
+    const purchaseTotal = sum(db.purchases.map(x=>x.total));
+    const low = lowStock().length;
+    const neg = negativeStock().length;
+    const rows = [
+      {name:'Sales Reports', count: db.sales.length, value: money(salesTotal)},
+      {name:'Purchase Reports', count: db.purchases.length, value: money(purchaseTotal)},
+      {name:'Low Stock Reports', count: low, value: 'Items'},
+      {name:'Negative Stock Reports', count: neg, value: 'Items'},
+      {name:'Return Reports', count: db.returns.length, value: 'Items'}
+    ];
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Reports Menu</strong><span class="muted">Separate report windows inside one deployment</span></div>
+          <div class="panel-bd">
+            <div class="tabs">
+              ${['sales','purchase','inventory','low','negative','customer','supplier','returns','profit','expense','ledger','tax','daily','monthly','yearly','custom','movement','cost','top','slow'].map(t=>`<button class="tab ${state.reportTab===t?'active':''}" data-report-tab="${t}">${t}</button>`).join('')}
+            </div>
+            <div style="height:12px"></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Report</th><th>Count</th><th>Summary</th></tr></thead>
+                <tbody>${rows.map(r=>`<tr><td>${safe(r.name)}</td><td>${r.count}</td><td>${safe(r.value)}</td></tr>`).join('')}</tbody>
+              </table>
+            </div>
+            <div style="height:12px"></div>
+            <button class="btn" id="exportReportsBtn">Export Summary CSV</button>
+            <button class="btn" id="printReportsBtn">Print Preview</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>Sales vs Purchases</strong><span class="muted">Simple chart</span></div>
+          <div class="panel-bd">
+            <div class="chart">
+              <div class="bar-row">
+                <div class="bar" style="height:${Math.min(100, (salesTotal||1)/(Math.max(salesTotal,purchaseTotal,1))*100)}%"><span>${money(salesTotal)}</span></div>
+                <div class="bar" style="height:${Math.min(100, (purchaseTotal||1)/(Math.max(salesTotal,purchaseTotal,1))*100)}%"><span>${money(purchaseTotal)}</span></div>
+              </div>
+              <div class="bar-labels"><div>Sales</div><div>Purchases</div></div>
+            </div>
+            <div class="footer-note">Profit/Loss = Sales - Purchases. Product statistics are always visible in product details.</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSettings(){
+    const s = db.settings;
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Company Settings</strong><button class="btn primary" id="saveSettingsBtn">Save Settings</button></div>
+          <div class="panel-bd">
+            <div class="split2">
+              <div class="field wide"><label>Company Name</label><input id="set_companyName" value="${safe(s.companyName)}"></div>
+              <div class="field"><label>Database Mode</label>
+                <select id="set_dbMode">
+                  <option value="sqlite" ${s.dbMode==='sqlite'?'selected':''}>SQLite</option>
+                  <option value="mysql" ${s.dbMode==='mysql'?'selected':''}>MySQL</option>
+                </select>
+              </div>
+              <div class="field"><label>Theme</label>
+                <select id="set_theme">
+                  <option value="dark" ${s.theme==='dark'?'selected':''}>Dark</option>
+                  <option value="light" ${s.theme==='light'?'selected':''}>Light</option>
+                </select>
+              </div>
+              <div class="field"><label>Printer Mode</label>
+                <select id="set_printerMode">
+                  <option value="thermal" ${s.printerMode==='thermal'?'selected':''}>Thermal</option>
+                  <option value="a4" ${s.printerMode==='a4'?'selected':''}>A4</option>
+                </select>
+              </div>
+              <div class="field"><label>Phone</label><input id="set_phone" value="${safe(s.phone)}"></div>
+              <div class="field"><label>Email</label><input id="set_email" value="${safe(s.email)}"></div>
+              <div class="field wide"><label>Address</label><textarea id="set_address">${safe(s.address)}</textarea></div>
+              <div class="field wide"><label>Receipt Footer</label><textarea id="set_receiptFooter">${safe(s.receiptFooter)}</textarea></div>
+            </div>
+            <div style="height:10px"></div>
+            <div class="warning">Pure HTML/JS uses local storage here. For real MySQL/SQLite, attach a backend or desktop wrapper later.</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>License & Network</strong></div>
+          <div class="panel-bd">
+            <div class="field"><label>License</label>
+              <select id="set_license"><option value="trial" ${s.license==='trial'?'selected':''}>Trial</option><option value="activated" ${s.license==='activated'?'selected':''}>Activated</option></select>
+            </div>
+            <div style="height:10px"></div>
+            <div class="field"><label>Trial End Date</label><input id="set_trialEnd" type="date" value="${safe((s.trialEnd||today()).slice(0,10))}"></div>
+            <div style="height:10px"></div>
+            <div class="split2">
+              <div class="field"><label>Server IP</label><input id="net_ip" value="${safe(db.network.serverIP)}"></div>
+              <div class="field"><label>Port</label><input id="net_port" value="${safe(db.network.port)}"></div>
+              <div class="field"><label>Database Name</label><input id="net_dbName" value="${safe(db.network.dbName)}"></div>
+              <div class="field"><label>Username</label><input id="net_user" value="${safe(db.network.username)}"></div>
+              <div class="field wide"><label>Password</label><input id="net_pass" type="password" value="${safe(db.network.password)}"></div>
+            </div>
+            <div style="height:10px"></div>
+            <button class="btn" id="testNetworkBtn">Test Connection</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAudit(){
+    return `
+      <div class="panel">
+        <div class="panel-hd"><strong>Audit Logs</strong><button class="btn" id="exportAuditBtn">Export CSV</button></div>
+        <div class="panel-bd">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Action</th><th>Meta</th></tr></thead>
+              <tbody>
+                ${db.audit.map(a=>`<tr><td>${safe(a.date)}</td><td>${safe(a.action)}</td><td>${safe(JSON.stringify(a.meta || {}))}</td></tr>`).join('') || `<tr><td colspan="3" class="muted">No logs</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderBackup(){
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Backup & Recovery</strong></div>
+          <div class="panel-bd">
+            <div class="row">
+              <button class="btn primary" id="downloadBackupBtn">Manual Backup JSON</button>
+              <button class="btn" id="importBackupBtn">Restore Backup JSON</button>
+            </div>
+            <div class="footer-note">This exports full local state including invoices, stock, users, logs, and settings.</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>Restore Notes</strong></div>
+          <div class="panel-bd">
+            <div class="dangerbox">
+              Restoring replaces the current local database. Keep a copy before importing.
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAnalytics(){
+    const byDay = db.sales.reduce((acc,s)=>{acc[s.date]=(acc[s.date]||0)+Number(s.total||0); return acc;},{});
+    const days = Object.keys(byDay).sort().slice(-7);
+    return `
+      <div class="split">
+        <div class="panel">
+          <div class="panel-hd"><strong>Analytics Dashboard</strong><span class="muted">Revenue charts</span></div>
+          <div class="panel-bd">
+            <div class="chart">
+              <div class="bar-row">
+                ${days.map(d=>`<div class="bar" style="height:${Math.max(16, Math.min(100, (byDay[d]/Math.max(...days.map(x=>byDay[x]||1),1))*100))}%"><span>${money(byDay[d]||0)}</span></div>`).join('')}
+              </div>
+              <div class="bar-labels">${days.map(d=>`<div>${safe(d)}</div>`).join('')}</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><strong>KPIs</strong></div>
+          <div class="panel-bd">
+            <div class="grid" style="gap:10px">
+              <div class="warning">Total Products: <strong>${db.products.length}</strong></div>
+              <div class="warning">Low Stock: <strong>${lowStock().length}</strong></div>
+              <div class="warning">Negative Stock: <strong>${negativeStock().length}</strong></div>
+              <div class="warning">Sales Invoices: <strong>${db.sales.length}</strong></div>
+              <div class="warning">Purchase Invoices: <strong>${db.purchases.length}</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCredits(){
+    return `
+      <div class="panel">
+        <div class="panel-hd"><strong>Credits</strong></div>
+        <div class="panel-bd">
+          <div class="split2">
+            <div class="card">
+              <h3>Developer</h3><div class="num">MetaMind Tech</div>
+              <div class="sub">Branding placeholder</div>
+            </div>
+            <div class="card">
+              <h3>Version</h3><div class="num">${safe(db.meta.version)}</div>
+              <div class="sub">${safe(db.meta.createdAt)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const screenRenderer = {
+    dashboard: renderDashboard,
+    pos: renderPOS,
+    products: renderProducts,
+    categories: () => renderSimpleCRUD('categories'),
+    brands: () => renderSimpleCRUD('brands'),
+    units: () => renderSimpleCRUD('units'),
+    suppliers: () => renderSimpleCRUD('suppliers'),
+    customers: () => renderSimpleCRUD('customers'),
+    inventory: renderInventory,
+    lowstock: renderLowStock,
+    negstock: renderNegStock,
+    purchases: renderPurchases,
+    sales: renderSales,
+    returns: renderReturns,
+    reports: renderReports,
+    users: () => renderSimpleCRUD('users'),
+    settings: renderSettings,
+    audit: renderAudit,
+    backup: renderBackup,
+    analytics: renderAnalytics,
+    credits: renderCredits
+  };
+
+  function openProductDetails(pid){
+    const p = productById(pid);
+    if(!p) return;
+    const st = productStats(pid);
+    openModal(`Product Details - ${p.name}`, `
+      <div class="split2">
+        <div class="panel" style="box-shadow:none">
+          <div class="panel-bd">
+            <div class="row">
+              <div class="pill">Current Qty: <strong>${st.current}</strong></div>
+              <div class="pill">Sold Qty: <strong>${st.sold}</strong></div>
+              <div class="pill">Purchased Qty: <strong>${st.purchased}</strong></div>
+              <div class="pill">Returned Qty: <strong>${st.returned}</strong></div>
+              <div class="pill">Reserved Qty: <strong>${st.reserved}</strong></div>
+            </div>
+            <div style="height:10px"></div>
+            <div class="muted mini">Barcode: ${safe(p.barcode||'-')}</div>
+            <div class="muted mini">SKU: ${safe(p.sku||'-')}</div>
+            <div class="muted mini">Category: ${safe(categoryById(p.categoryId)?.name || '-')}</div>
+            <div class="muted mini">Brand: ${safe(brandById(p.brandId)?.name || '-')}</div>
+            <div class="muted mini">Unit: ${safe(unitById(p.unitId)?.name || '-')}</div>
+            <div class="muted mini">Warehouse: ${safe(p.warehouse||'Main')}</div>
+            <div class="muted mini">Cost: ${money(p.cost)}</div>
+            <div class="muted mini">Sale: ${money(p.sale)}</div>
+            <div class="muted mini">Threshold: ${p.threshold}</div>
+          </div>
+        </div>
+        <div class="panel" style="box-shadow:none">
+          <div class="panel-bd">
+            <div class="footer-note">${safe(p.notes || 'No notes')}</div>
+            <div style="height:12px"></div>
+            <button class="btn primary" data-add-to-cart="${p.id}">Add to POS Cart</button>
+            <button class="btn" data-open-product-edit="${p.id}">Edit Product</button>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  function editProduct(pid){
+    const p = productById(pid);
+    if(!p) return;
+    formModal({
+      title:'Edit Product',
+      fields:[
+        {name:'name',label:'Product Name',required:true,default:p.name},
+        {name:'barcode',label:'Barcode',default:p.barcode},
+        {name:'sku',label:'SKU',default:p.sku},
+        {name:'categoryId',label:'Category',type:'select',options:db.categories.map(c=>({value:c.id,label:c.name})),default:p.categoryId},
+        {name:'brandId',label:'Brand',type:'select',options:db.brands.map(b=>({value:b.id,label:b.name})),default:p.brandId},
+        {name:'unitId',label:'Unit',type:'select',options:db.units.map(u=>({value:u.id,label:u.name})),default:p.unitId},
+        {name:'cost',label:'Cost Price',type:'number',step:'0.01',default:p.cost},
+        {name:'sale',label:'Sale Price',type:'number',step:'0.01',default:p.sale},
+        {name:'stock',label:'Current Stock',type:'number',step:'1',default:p.stock},
+        {name:'threshold',label:'Low Stock Threshold',type:'number',step:'1',default:p.threshold},
+        {name:'warehouse',label:'Warehouse',default:p.warehouse||'Main'},
+        {name:'status',label:'Status',type:'select',options:[{value:'active',label:'Active'},{value:'inactive',label:'Inactive'}],default:p.status},
+        {name:'notes',label:'Notes',type:'textarea',wide:true,default:p.notes}
+      ],
+      values:p,
+      onSave:(data, close)=>{ addProduct(data, p.id); close(); }
+    });
+  }
+
+  function addProductModal(){
+    formModal({
+      title:'Add Product',
+      fields:[
+        {name:'name',label:'Product Name',required:true},
+        {name:'barcode',label:'Barcode'},
+        {name:'sku',label:'SKU'},
+        {name:'categoryId',label:'Category',type:'select',options:db.categories.map(c=>({value:c.id,label:c.name}))},
+        {name:'brandId',label:'Brand',type:'select',options:db.brands.map(b=>({value:b.id,label:b.name}))},
+        {name:'unitId',label:'Unit',type:'select',options:db.units.map(u=>({value:u.id,label:u.name}))},
+        {name:'cost',label:'Cost Price',type:'number',step:'0.01',default:0},
+        {name:'sale',label:'Sale Price',type:'number',step:'0.01',default:0},
+        {name:'stock',label:'Opening Stock',type:'number',step:'1',default:0},
+        {name:'threshold',label:'Low Stock Threshold',type:'number',step:'1',default:0},
+        {name:'warehouse',label:'Warehouse',default:'Main'},
+        {name:'status',label:'Status',type:'select',options:[{value:'active',label:'Active'},{value:'inactive',label:'Inactive'}],default:'active'},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ],
+      onSave:(data, close)=>{ addProduct(data); close(); }
+    });
+  }
+
+  function addInventoryToPurchase(){
+    const supplierId = document.getElementById('invSupplier')?.value || '';
+    const expenses = Number(document.getElementById('invExpenses')?.value || 0);
+    const inputs = [...document.querySelectorAll('[data-inv-product]')];
+    const items = [];
+    inputs.forEach(inp => {
+      const pid = inp.dataset.invProduct;
+      const field = inp.dataset.field;
+      const row = inputs.filter(x=>x.dataset.invProduct===pid);
+      const qty = Number(row.find(x=>x.dataset.field==='qty')?.value || 0);
+      const cost = Number(row.find(x=>x.dataset.field==='cost')?.value || 0);
+      if(qty > 0) items.push({productId:pid, qty, cost});
+    });
+    if(!items.length){ toast('No stock quantity entered','bad'); return; }
+    createPurchaseInvoice({supplierId, expenses, items, note:'Inventory add stock'});
+  }
+
+  function addToCart(pid){
+    const p = productById(pid);
+    if(!p) return;
+    const existing = state.posCart.find(x=>x.productId===pid);
+    if(existing) existing.qty = Number(existing.qty)+1;
+    else state.posCart.unshift({productId:p.id, name:p.name, barcode:p.barcode, qty:1, price:Number(p.sale||0), discount:0});
+    render();
+  }
+
+  function showSaleView(id){
+    const s = db.sales.find(x=>x.id===id);
+    if(!s) return;
+    openModal(`Sale Invoice - ${s.invoiceNo}`, `
+      <div class="panel" style="box-shadow:none">
+        <div class="panel-bd">
+          <div class="row">
+            <div class="pill">Date: <strong>${safe(s.date)}</strong></div>
+            <div class="pill">Customer: <strong>${safe(customerById(s.customerId)?.name || 'Walk-in')}</strong></div>
+            <div class="pill">Total: <strong>${money(s.total)}</strong></div>
+            <div class="pill">Payment: <strong>${safe(s.paymentMethod)}</strong></div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line Total</th></tr></thead>
+              <tbody>${s.items.map(i=>`<tr><td>${safe(i.name)}</td><td>${i.qty}</td><td>${fmt(i.price)}</td><td>${money(i.lineTotal)}</td></tr>`).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `, `<button class="btn" data-close>Close</button><button class="btn primary" id="printSaleViewBtn">Print</button>`);
+    setTimeout(()=> {
+      const b = document.getElementById('printSaleViewBtn');
+      if(b) b.onclick = ()=> printReceipt(s);
+    }, 0);
+  }
+
+  function showPurchaseView(id){
+    const p = db.purchases.find(x=>x.id===id);
+    if(!p) return;
+    openModal(`Purchase Invoice - ${p.invoiceNo}`, `
+      <div class="panel" style="box-shadow:none">
+        <div class="panel-bd">
+          <div class="row">
+            <div class="pill">Date: <strong>${safe(p.date)}</strong></div>
+            <div class="pill">Supplier: <strong>${safe(supplierById(p.supplierId)?.name || '-')}</strong></div>
+            <div class="pill">Total: <strong>${money(p.total)}</strong></div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Qty</th><th>Cost</th><th>Line Total</th></tr></thead>
+              <tbody>${p.items.map(i=>`<tr><td>${safe(i.name)}</td><td>${i.qty}</td><td>${fmt(i.cost)}</td><td>${money(i.lineTotal)}</td></tr>`).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+
+  function saveSettings(){
+    db.settings.companyName = document.getElementById('set_companyName').value;
+    db.settings.dbMode = document.getElementById('set_dbMode').value;
+    db.settings.theme = document.getElementById('set_theme').value;
+    db.settings.printerMode = document.getElementById('set_printerMode').value;
+    db.settings.phone = document.getElementById('set_phone').value;
+    db.settings.email = document.getElementById('set_email').value;
+    db.settings.address = document.getElementById('set_address').value;
+    db.settings.receiptFooter = document.getElementById('set_receiptFooter').value;
+    db.settings.license = document.getElementById('set_license').value;
+    db.settings.trialEnd = document.getElementById('set_trialEnd').value;
+    db.network.serverIP = document.getElementById('net_ip').value;
+    db.network.port = document.getElementById('net_port').value;
+    db.network.dbName = document.getElementById('net_dbName').value;
+    db.network.username = document.getElementById('net_user').value;
+    db.network.password = document.getElementById('net_pass').value;
+    saveDB(); addAudit('Settings saved');
+    toast('Settings saved');
+  }
+
+  function downloadBackup(){
+    const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `metamind-pos-backup-${today()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    addAudit('Backup exported');
+  }
+
+  function importBackup(){
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'application/json';
+    inp.onchange = async () => {
+      const file = inp.files?.[0];
+      if(!file) return;
+      const text = await file.text();
+      try{
+        const obj = JSON.parse(text);
+        db = obj;
+        saveDB();
+        addAudit('Backup restored');
+        toast('Backup restored');
+        render();
+      }catch{
+        toast('Invalid backup file','bad');
+      }
+    };
+    inp.click();
+  }
+
+  function saveReturn(){
+    const saleId = document.getElementById('returnSaleId').value;
+    const amount = Number(document.getElementById('returnAmount').value || 0);
+    if(!saleId){ toast('Select sale invoice','bad'); return; }
+    const sale = db.sales.find(s => s.id===saleId);
+    const r = {id: uid('RET'), type:'customer', invoiceNo: sale?.invoiceNo || '', saleId, date: today(), items:[], amount};
+    db.returns.unshift(r);
+    saveDB();
+    addAudit('Return saved', {invoiceNo:r.invoiceNo, amount});
+    toast('Return saved');
+    render();
+  }
+
+  function quickPurchase(){
+    setScreen('inventory');
+    toast('Use inventory screen to add stock and create purchase invoice');
+  }
+
+  function quickSale(){
+    setScreen('pos');
+    toast('POS ready');
+  }
+
+  function handleActionTarget(target, id){
+    if(target==='open-product') return openProductDetails(id);
+    if(target==='edit-product') return editProduct(id);
+    if(target==='del-product') return deleteById('products', id);
+    if(target==='open-sale') return showSaleView(id);
+    if(target==='view-sale') return showSaleView(id);
+    if(target==='view-purchase') return showPurchaseView(id);
+    if(target==='open-product-edit') return editProduct(id);
+    if(target==='add-to-cart') return addToCart(id);
+
+    const typeMap = {
+      category:{arr:'categories', edit:'addCategory', del:'categories'},
+      brand:{arr:'brands', edit:'addBrand', del:'brands'},
+      unit:{arr:'units', edit:'addUnit', del:'units'},
+      supplier:{arr:'suppliers', edit:'addSupplier', del:'suppliers'},
+      customer:{arr:'customers', edit:'addCustomer', del:'customers'},
+      user:{arr:'users', edit:'addUser', del:'users'}
+    };
+  }
+
+  function bindGlobalEvents(){
+    document.getElementById('toggleSidebar').onclick = sidebarToggle;
+    document.getElementById('globalSearch').oninput = e => globalSearch(e.target.value);
+    document.getElementById('quickSaleBtn').onclick = quickSale;
+    document.getElementById('quickPurchaseBtn').onclick = quickPurchase;
+    document.getElementById('backupBtn').onclick = () => setScreen('backup');
+
+    document.getElementById('menu').onclick = e => {
+      const btn = e.target.closest('button[data-screen]');
+      if(btn) setScreen(btn.dataset.screen);
+    };
+
+    document.getElementById('appRoot').onclick = e => {
+      const d = e.target.closest('[data-open-product]');
+      if(d) return openProductDetails(d.dataset.openProduct);
+
+      const epr = e.target.closest('[data-edit-product]');
+      if(epr) return editProduct(epr.dataset.editProduct);
+
+      const delP = e.target.closest('[data-del-product]');
+      if(delP) return deleteById('products', delP.dataset.delProduct);
+
+      const addP = e.target.closest('[data-add-product]');
+      if(addP) return addToCart(addP.dataset.addProduct);
+
+      const sale = e.target.closest('[data-view-sale]');
+      if(sale) return showSaleView(sale.dataset.viewSale);
+
+      const pur = e.target.closest('[data-view-purchase]');
+      if(pur) return showPurchaseView(pur.dataset.viewPurchase);
+
+      const resume = e.target.closest('[data-resume-held]');
+      if(resume){
+        const h = db.heldInvoices.find(x=>x.id===resume.dataset.resumeHeld);
+        if(h){ state.posCart = h.items || []; state.posCustomerId = h.customerId || ''; state.posDiscount = h.discount || 0; state.posPayment = h.paymentMethod || 'cash'; state.posHoldId = h.id; setScreen('pos'); render(); toast('Held invoice resumed'); }
+      }
+
+      const openProdEdit = e.target.closest('[data-open-product-edit]');
+      if(openProdEdit) return editProduct(openProdEdit.dataset.openProductEdit);
+
+      const editCat = e.target.closest('[data-edit-categorie], [data-edit-category]');
+      if(editCat){ const id = editCat.dataset.editCategorie || editCat.dataset.editCategory; const x = db.categories.find(v=>v.id===id); if(x) formModal({title:'Edit Category', fields:[
+        {name:'name',label:'Category Name',required:true},
+        {name:'parentId',label:'Parent Category',type:'select',options:[{value:'',label:'None'}].concat(db.categories.map(c=>({value:c.id,label:c.name})))},
+        {name:'icon',label:'Icon'},
+        {name:'active',label:'Active',type:'checkbox'}
+      ], values:x, onSave:(d,close)=>{ addCategory(d,id); close(); }}); return; }
+
+      const editBrand = e.target.closest('[data-edit-brand]');
+      if(editBrand){ const id = editBrand.dataset.editBrand; const x = db.brands.find(v=>v.id===id); if(x) formModal({title:'Edit Brand', fields:[
+        {name:'name',label:'Brand Name',required:true},
+        {name:'logo',label:'Logo'},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], values:x, onSave:(d,close)=>{ addBrand(d,id); close(); }}); return; }
+
+      const editUnit = e.target.closest('[data-edit-unit]');
+      if(editUnit){ const id = editUnit.dataset.editUnit; const x = db.units.find(v=>v.id===id); if(x) formModal({title:'Edit Unit', fields:[{name:'name',label:'Unit Name',required:true}], values:x, onSave:(d,close)=>{ addUnit(d,id); close(); }}); return; }
+
+      const editSupp = e.target.closest('[data-edit-supplier]');
+      if(editSupp){ const id = editSupp.dataset.editSupplier; const x = db.suppliers.find(v=>v.id===id); if(x) formModal({title:'Edit Supplier', fields:[
+        {name:'name',label:'Supplier Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], values:x, onSave:(d,close)=>{ addSupplier(d,id); close(); }}); return; }
+
+      const editCust = e.target.closest('[data-edit-customer]');
+      if(editCust){ const id = editCust.dataset.editCustomer; const x = db.customers.find(v=>v.id===id); if(x) formModal({title:'Edit Customer', fields:[
+        {name:'name',label:'Customer Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'balance',label:'Opening Balance',type:'number',step:'0.01'},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], values:x, onSave:(d,close)=>{ addCustomer(d,id); close(); }}); return; }
+
+      const editUser = e.target.closest('[data-edit-user]');
+      if(editUser){ const id = editUser.dataset.editUser; const x = db.users.find(v=>v.id===id); if(x) formModal({title:'Edit User', fields:[
+        {name:'username',label:'Username',required:true},
+        {name:'pin',label:'PIN',type:'password'},
+        {name:'role',label:'Role'},
+        {name:'active',label:'Active',type:'checkbox'},
+        {name:'all',label:'Full Access',type:'checkbox'}
+      ], values:x, onSave:(d,close)=>{ addUser(d,id); close(); }}); return; }
+
+      const delCat = e.target.closest('[data-del-category]');
+      if(delCat) return deleteById('categories', delCat.dataset.delCategory);
+      const delBrand = e.target.closest('[data-del-brand]');
+      if(delBrand) return deleteById('brands', delBrand.dataset.delBrand);
+      const delUnit = e.target.closest('[data-del-unit]');
+      if(delUnit) return deleteById('units', delUnit.dataset.delUnit);
+      const delSupp = e.target.closest('[data-del-supplier]');
+      if(delSupp) return deleteById('suppliers', delSupp.dataset.delSupplier);
+      const delCust = e.target.closest('[data-del-customer]');
+      if(delCust) return deleteById('customers', delCust.dataset.delCustomer);
+      const delUser = e.target.closest('[data-del-user]');
+      if(delUser) return deleteById('users', delUser.dataset.delUser);
+
+      const tab = e.target.closest('[data-report-tab]');
+      if(tab){ state.reportTab = tab.dataset.reportTab; render(); return; }
+    };
+
+    document.getElementById('appRoot').oninput = e => {
+      const cartField = e.target.closest('[data-cart-field]');
+      if(cartField){
+        const idx = Number(cartField.dataset.cartField);
+        const field = cartField.dataset.field;
+        state.posCart[idx][field] = e.target.value;
+        renderPosKeep();
+      }
+    };
+
+    document.getElementById('appRoot').onchange = e => {
+      if(e.target.id === 'posCustomer') state.posCustomerId = e.target.value;
+      if(e.target.id === 'posPayment') state.posPayment = e.target.value;
+      if(e.target.id === 'posDiscount') state.posDiscount = Number(e.target.value||0);
+    };
+    document.getElementById('appRoot').onclick = e => {
+      const rm = e.target.closest('[data-remove-cart]');
+      if(rm){ state.posCart.splice(Number(rm.dataset.removeCart),1); renderPosKeep(); }
+    };
+
+    document.getElementById('appRoot').addEventListener('click', e => {
+      const add = e.target.closest('[id="addProductBtn"]');
+      if(add) addProductModal();
+
+      const exp = e.target.closest('#exportProductsBtn');
+      if(exp) exportCSV('products', db.products.map(p=>({
+        name:p.name, barcode:p.barcode, sku:p.sku, category:categoryById(p.categoryId)?.name||'',
+        brand:brandById(p.brandId)?.name||'', unit:unitById(p.unitId)?.name||'', cost:p.cost, sale:p.sale, stock:p.stock, threshold:p.threshold, warehouse:p.warehouse
+      })));
+
+      const createPur = e.target.closest('#createPurchaseBtn');
+      if(createPur) addInventoryToPurchase();
+
+      const saveSale = e.target.closest('#saveSaleBtn');
+      if(saveSale) createSaleInvoiceFromCart();
+
+      const hold = e.target.closest('#holdSaleBtn');
+      if(hold){
+        if(!state.posCart.length){ toast('Cart empty','bad'); return; }
+        const holdObj = { id: uid('HLD'), name: 'Held Sale', items: JSON.parse(JSON.stringify(state.posCart)), customerId: state.posCustomerId, discount: state.posDiscount, paymentMethod: state.posPayment, ts: nowIso() };
+        db.heldInvoices.unshift(holdObj);
+        state.posCart = []; state.posDiscount = 0; state.posCustomerId = ''; state.posPayment = 'cash';
+        saveDB(); addAudit('Sale held', {id:holdObj.id}); toast('Invoice held'); render();
+      }
+
+      const resume = e.target.closest('#resumeHoldBtn');
+      if(resume){
+        if(!db.heldInvoices.length){ toast('No held invoices','bad'); return; }
+        const h = db.heldInvoices[0];
+        state.posCart = JSON.parse(JSON.stringify(h.items || []));
+        state.posCustomerId = h.customerId || '';
+        state.posDiscount = h.discount || 0;
+        state.posPayment = h.paymentMethod || 'cash';
+        state.posHoldId = h.id;
+        render();
+        toast('Latest held invoice loaded');
+      }
+
+      const clear = e.target.closest('#clearCartBtn');
+      if(clear){ state.posCart=[]; state.posDiscount=0; state.posCustomerId=''; state.posPayment='cash'; render(); }
+
+      const pay = e.target.closest('#paySaleBtn');
+      if(pay) createSaleInvoiceFromCart();
+
+      const addCat = e.target.closest('#add-categories');
+      if(addCat) formModal({title:'Add Category', fields:[
+        {name:'name',label:'Category Name',required:true},
+        {name:'parentId',label:'Parent Category',type:'select',options:[{value:'',label:'None'}].concat(db.categories.map(c=>({value:c.id,label:c.name})))},
+        {name:'icon',label:'Icon',default:'🗂'},
+        {name:'active',label:'Active',type:'checkbox',default:true}
+      ], onSave:(d,close)=>{ addCategory(d); close(); }});
+
+      const addBrandBtn = e.target.closest('#add-brands');
+      if(addBrandBtn) formModal({title:'Add Brand', fields:[
+        {name:'name',label:'Brand Name',required:true},
+        {name:'logo',label:'Logo',default:'🏷️'},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], onSave:(d,close)=>{ addBrand(d); close(); }});
+
+      const addUnitBtn = e.target.closest('#add-units');
+      if(addUnitBtn) formModal({title:'Add Unit', fields:[{name:'name',label:'Unit Name',required:true}], onSave:(d,close)=>{ addUnit(d); close(); }});
+
+      const addSupBtn = e.target.closest('#add-suppliers');
+      if(addSupBtn) formModal({title:'Add Supplier', fields:[
+        {name:'name',label:'Supplier Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], onSave:(d,close)=>{ addSupplier(d); close(); }});
+
+      const addCusBtn = e.target.closest('#add-customers');
+      if(addCusBtn) formModal({title:'Add Customer', fields:[
+        {name:'name',label:'Customer Name',required:true},
+        {name:'phone',label:'Phone'},
+        {name:'email',label:'Email'},
+        {name:'address',label:'Address',type:'textarea',wide:true},
+        {name:'balance',label:'Opening Balance',type:'number',step:'0.01',default:0},
+        {name:'notes',label:'Notes',type:'textarea',wide:true}
+      ], onSave:(d,close)=>{ addCustomer(d); close(); }});
+
+      const addUsrBtn = e.target.closest('#add-users');
+      if(addUsrBtn) formModal({title:'Add User', fields:[
+        {name:'username',label:'Username',required:true},
+        {name:'pin',label:'PIN',type:'password',default:'1234'},
+        {name:'role',label:'Role',default:'Staff'},
+        {name:'active',label:'Active',type:'checkbox',default:true},
+        {name:'all',label:'Full Access',type:'checkbox'}
+      ], onSave:(d,close)=>{ addUser(d); close(); }});
+
+      const addProd = e.target.closest('#addProductBtn');
+      if(addProd) addProductModal();
+
+      const saveRet = e.target.closest('#saveReturnBtn');
+      if(saveRet) saveReturn();
+
+      const saveSet = e.target.closest('#saveSettingsBtn');
+      if(saveSet) saveSettings();
+
+      const testNet = e.target.closest('#testNetworkBtn');
+      if(testNet) toast('Connection test is UI-only in pure HTML mode','warn');
+
+      const download = e.target.closest('#downloadBackupBtn');
+      if(download) downloadBackup();
+      const importB = e.target.closest('#importBackupBtn');
+      if(importB) importBackup();
+
+      const expAudit = e.target.closest('#exportAuditBtn');
+      if(expAudit) exportCSV('audit_logs', db.audit);
+
+      const expReports = e.target.closest('#exportReportsBtn');
+      if(expReports) exportCSV('reports_summary', [
+        {Report:'Sales', Count:db.sales.length, Total: sum(db.sales.map(x=>x.total))},
+        {Report:'Purchases', Count:db.purchases.length, Total: sum(db.purchases.map(x=>x.total))},
+        {Report:'Low Stock', Count:lowStock().length, Total:0},
+        {Report:'Negative Stock', Count:negativeStock().length, Total:0},
+        {Report:'Returns', Count:db.returns.length, Total: sum(db.returns.map(x=>x.amount||0))}
+      ]);
+
+      const printReports = e.target.closest('#printReportsBtn');
+      if(printReports) window.print();
+
+      const gotoPos = e.target.closest('#gotoPos');
+      if(gotoPos) setScreen('pos');
+      const gotoProducts = e.target.closest('#gotoProducts');
+      if(gotoProducts) setScreen('products');
+      const gotoInventory = e.target.closest('#gotoInventory');
+      if(gotoInventory) setScreen('inventory');
+      const gotoReports = e.target.closest('#gotoReports');
+      if(gotoReports) setScreen('reports');
+
+      const exportGrid = e.target.closest('#exportGridBtn');
+      if(exportGrid){
+        const arr = state.screen==='lowstock' ? lowStock().map(p=>({Product:p.name, Current:p.stock, Threshold:p.threshold, Warehouse:p.warehouse || 'Main'}))
+                  : state.screen==='negstock' ? negativeStock().map(p=>({Product:p.name, Current:p.stock, Sold:productStats(p.id).sold, Purchased:productStats(p.id).purchased, Warehouse:p.warehouse || 'Main'}))
+                  : [];
+        exportCSV(state.screen, arr);
+      }
+    });
+
+    document.getElementById('appRoot').onkeydown = (e) => {
+      if(e.target && (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.tagName==='SELECT')) return;
+      if(e.key === 'F1'){ e.preventDefault(); setScreen('pos'); }
+      if(e.key === 'F2'){ e.preventDefault(); if(state.screen==='pos') createSaleInvoiceFromCart(); else if(state.screen==='settings') saveSettings(); }
+      if(e.key === 'F3'){ e.preventDefault(); if(state.screen==='pos'){ document.getElementById('holdSaleBtn')?.click(); } }
+      if(e.key === 'F4'){ e.preventDefault(); if(state.screen==='pos'){ document.getElementById('paySaleBtn')?.click(); } }
+      if(e.key === 'F5'){ e.preventDefault(); render(); }
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='p'){ e.preventDefault(); window.print(); }
+    };
+  }
+
+  function renderPosKeep(){
+    saveDB();
+    render();
+    setScreen('pos');
+  }
+
+  function start(){
+    renderMenu();
+    render();
+    bindGlobalEvents();
+    document.getElementById('menu').onclick = e => {
+      const btn = e.target.closest('button[data-screen]');
+      if(btn) setScreen(btn.dataset.screen);
+    };
+    setScreen('dashboard');
+    if(db.settings.theme === 'light'){
+      document.documentElement.style.setProperty('--bg','#edf2ff');
+      document.documentElement.style.setProperty('--panel','#ffffff');
+      document.documentElement.style.setProperty('--panel2','#f4f7ff');
+      document.documentElement.style.setProperty('--line','#d6def0');
+      document.documentElement.style.setProperty('--text','#0f172a');
+      document.documentElement.style.setProperty('--muted','#55607d');
+      document.body.style.background = 'linear-gradient(180deg,#eef3ff 0%,#e5ebfb 100%)';
+    }
+    addAudit('App started');
+  }
+
+  window.addEventListener('storage', () => { db = loadDB(); render(); });
+
+  // global modal close if click outside events after render
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-open-product]');
+    if(btn) openProductDetails(btn.dataset.openProduct);
+  });
+
+  // Extra screen-specific delegates
+  document.addEventListener('click', e => {
+    const a = e.target.closest('[data-open-sale]'); if(a) showSaleView(a.dataset.openSale);
+    const b = e.target.closest('[data-open-product-edit]'); if(b) editProduct(b.dataset.openProductEdit);
+    const c = e.target.closest('[data-add-to-cart]'); if(c) addToCart(c.dataset.addToCart);
+  });
+
+  start();
+
+})();
+</script>
+</body>
+</html>
